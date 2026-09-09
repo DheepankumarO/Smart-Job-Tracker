@@ -32,12 +32,28 @@ class ApplicationTracker:
         for application in self.applications:
             print(application)
             print("-" * 40)
-    
+            
     def find_application(self, company):
         for application in self.applications:
             if application.company.lower() == company.lower():
                 return application
         return None           
+    
+    def update_application(self, company, new_status):
+        allowed_statuses = ["Saved", "Applied", "Interview", "Offer", "Rejected", "Withdrawn"]
+        
+        formated_status = new_status.title()
+        if formated_status not in allowed_statuses:
+            print(f"Invalid status: {new_status}")
+            print(f"Allowed statuses: {', '.join(allowed_statuses)}")
+            return False
+        
+        application = self.find_application(company)
+        if application is None:
+            return False
+          
+        application.status = formated_status
+        return True
 
 application_one = JobApplication(
     "TechCorp", 
@@ -79,3 +95,35 @@ if found_application:
     print(found_application)
 else:
     print("Application not found.")
+    
+print("\nUpdating application status for TechCorp:")
+update_successful = tracker.update_application("TechCorp", "Interview")
+if update_successful:
+    print("Status updated successfully.")
+    print(tracker.find_application("TechCorp"))
+else:
+    print("Application not found. Status was not updated.")
+    
+    
+print("\nTrying to update an unknown company:")
+update_successful = tracker.update_application("UnknownCompany", "Rejected")
+if update_successful:
+    print("Status updated successfully.")
+else:
+    print("Application not found. Status was not updated.")
+    
+    
+print("\nTesting lowercase valid status:")
+update_successful = tracker.update_application("TechCorp", "offer")
+if update_successful:
+    print("Status updated successfully.")
+    print(tracker.find_application("TechCorp"))
+else:
+    print("Status was not updated.")
+    
+print("\nTesting invalid status:")
+update_successful = tracker.update_application("TechCorp", "Waiting")
+if update_successful:
+    print("Status updated successfully.")
+else:
+    print("Status was not updated.")
