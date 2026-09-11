@@ -9,13 +9,14 @@ class JobApplication:
         
     def __str__(self):
         return(
-            f"company: {self.company}\n"
+            f"company: {self.company}\n"                                                                                                                                                                                                                                                                                                                                                                                                                                                       
             f"position: {self.position}\n"
             f"Location: {self.location}\n"
             f"Job URL: {self.Job_URL}\n"
             f"Application date: {self.application_date}\n"
             f"status: {self.status}"
     )    
+    pass
 
 class ApplicationTracker:
     def __init__(self):
@@ -54,76 +55,79 @@ class ApplicationTracker:
           
         application.status = formated_status
         return True
-
-application_one = JobApplication(
-    "TechCorp", 
-    "Software Engineer", 
-    "New York", 
-    "https://techcorp.com/jobs/1",
-    "2026/09/01",
-    "Applied"
-    )
-
-application_two = JobApplication(
-    "Dataworks", 
-    "AI Engineer", 
-    "New York", 
-    "https://dataworks.com/jobs/1",
-    "2026/09/02",
-    "Applied"
-    )
-
-tracker = ApplicationTracker()
-
-tracker.list_applications()
-
-tracker.add_applications(application_one)
-tracker.add_applications(application_two)
-
-applications = [application_one, application_two]
-
-tracker.list_applications()
+    pass
     
-print(f"Total applications: {len(tracker.applications)}")
+if __name__ == "__main__":
 
-print("\nSearching for TechCorp:")
+    application_one = JobApplication(
+        "TechCorp", 
+        "Software Engineer", 
+        "New York", 
+        "https://techcorp.com/jobs/1",
+        "2026/09/01",
+        "Applied"
+        )
 
-found_application = tracker.find_application("techcorp")
+    application_two = JobApplication(
+        "Dataworks", 
+        "AI Engineer", 
+        "New York", 
+        "https://dataworks.com/jobs/1",
+        "2026/09/02",
+        "Applied"
+        )
 
-if found_application:
-    print("Application found:")
-    print(found_application)
-else:
-    print("Application not found.")
-    
-print("\nUpdating application status for TechCorp:")
-update_successful = tracker.update_application("TechCorp", "Interview")
-if update_successful:
-    print("Status updated successfully.")
-    print(tracker.find_application("TechCorp"))
-else:
-    print("Application not found. Status was not updated.")
-    
-    
-print("\nTrying to update an unknown company:")
-update_successful = tracker.update_application("UnknownCompany", "Rejected")
-if update_successful:
-    print("Status updated successfully.")
-else:
-    print("Application not found. Status was not updated.")
-    
-    
-print("\nTesting lowercase valid status:")
-update_successful = tracker.update_application("TechCorp", "offer")
-if update_successful:
-    print("Status updated successfully.")
-    print(tracker.find_application("TechCorp"))
-else:
-    print("Status was not updated.")
-    
-print("\nTesting invalid status:")
-update_successful = tracker.update_application("TechCorp", "Waiting")
-if update_successful:
-    print("Status updated successfully.")
-else:
-    print("Status was not updated.")
+    tracker = ApplicationTracker()
+
+    tracker.list_applications()
+
+    tracker.add_applications(application_one)
+    tracker.add_applications(application_two)
+
+    applications = [application_one, application_two]
+
+    tracker.list_applications()
+        
+    print(f"Total applications: {len(tracker.applications)}")
+
+    print("\nSearching for TechCorp:")
+
+    found_application = tracker.find_application("techcorp")
+
+    if found_application:
+        print("Application found:")
+        print(found_application)
+    else:
+        print("Application not found.")
+        
+    print("\nUpdating application status for TechCorp:")
+    update_successful = tracker.update_application("TechCorp", "Interview")
+    if update_successful:
+        print("Status updated successfully.")
+        print(tracker.find_application("TechCorp"))
+    else:
+        print("Application not found. Status was not updated.")
+        
+        
+    print("\nTrying to update an unknown company:")
+    update_successful = tracker.update_application("UnknownCompany", "Rejected")
+    if update_successful:
+        print("Status updated successfully.")
+    else:
+        print("Application not found. Status was not updated.")
+        
+        
+    print("\nTesting lowercase valid status:")
+    update_successful = tracker.update_application("TechCorp", "offer")
+    if update_successful:
+        print("Status updated successfully.")
+        print(tracker.find_application("TechCorp"))
+    else:
+        print("Status was not updated.")
+        
+    print("\nTesting invalid status:")
+    update_successful = tracker.update_application("TechCorp", "Waiting")
+    if update_successful:
+        print("Status updated successfully.")
+    else:
+        print("Status was not updated.")
