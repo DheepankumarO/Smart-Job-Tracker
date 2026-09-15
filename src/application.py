@@ -1,3 +1,5 @@
+import json
+
 class JobApplication:
     def __init__(self, company, position, location, URL, application_date, status):
         self.company = company
@@ -8,6 +10,7 @@ class JobApplication:
         self.status = status
         
     def __str__(self):
+        
         return(
             f"company: {self.company}\n"                                                                                                                                                                                                                                                                                                                                                                                                                                                       
             f"position: {self.position}\n"
@@ -17,6 +20,16 @@ class JobApplication:
             f"status: {self.status}"
     )    
     pass
+
+    def to_dict(self):
+        return {
+            "company": self.company,
+            "position": self.position,
+            "location": self.location,
+            "job_url": self.Job_URL,
+            "application_date": self.application_date,
+            "status": self.status
+        }
 
 class ApplicationTracker:
     def __init__(self):
@@ -55,7 +68,38 @@ class ApplicationTracker:
           
         application.status = formated_status
         return True
-    pass
+    
+    def save_applications(self, filename):
+        application_data = [
+            application.to_dict()
+            for application in self.applications
+        ]
+        
+        with open(filename, "w", encoding="utf-8") as file:
+            json.dump(application_data, file, indent=4)
+    
+    def load_applications(self, filename):
+        try:
+            with open(filename, "r", encoding="utf-8") as file:
+                application_data = json.load(file)
+
+            self.applications = []
+
+            for data in application_data:
+                application = JobApplication(
+                    data["company"],
+                    data["position"],
+                    data["location"],
+                    data["job_url"],
+                    data["application_date"],
+                    data["status"]
+                )
+
+            self.applications.append(application)
+
+        except FileNotFoundError:
+            self.applications = []
+    
     
 if __name__ == "__main__":
 
@@ -131,3 +175,15 @@ if __name__ == "__main__":
         print("Status updated successfully.")
     else:
         print("Status was not updated.")
+        
+    print("\nApplication converted to dictionary:")
+    print(application_one.to_dict())    
+            
+    tracker.save_applications("applications.json")
+    print("\nApplications saved successfully.")
+
+    loaded_tracker = ApplicationTracker()
+    loaded_tracker.load_applications("applications.json")
+
+    print("\nApplications loaded from JSON:")
+    loaded_tracker.list_applications()

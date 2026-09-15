@@ -78,3 +78,37 @@ def test_update_missin_application():
     
     result = tracker.update_application("Unknown Company", "Interview")
     assert result is False
+
+def test_save_and_load_applications(tmp_path):
+    file_path = tmp_path / "applications.json"
+
+    tracker = ApplicationTracker()
+
+    application = JobApplication(
+        "TechCorp",
+        "Software Engineer",
+        "New York",
+        "https://techcorp.com/jobs/1",
+        "2026-09-01",
+        "Applied"
+    )
+
+
+    tracker.add_applications(application)
+    tracker.save_applications(file_path)
+
+    loaded_tracker = ApplicationTracker()
+    loaded_tracker.load_applications(file_path)
+
+    assert file_path.exists()
+    assert len(loaded_tracker.applications) == 1
+    assert loaded_tracker.applications[0].company == "TechCorp"
+    assert loaded_tracker.applications[0].status == "Applied"
+    
+def test_load_missing_file(tmp_path):
+    missing_file = tmp_path / "missing.json"
+
+    tracker = ApplicationTracker()
+    tracker.load_applications(missing_file)
+
+    assert tracker.applications == []

@@ -10,3 +10,6 @@ The current Python version can
 - and update application statuses using validated values.
 
 # Add automated tests with pytest
+
+# Add automated tests with pytest
+# Save and load applications using JSON
