@@ -9,12 +9,12 @@ The current Python version can
 - search by company name, 
 - and update application statuses using validated values.
 
-~ Add automated tests with pytest
+~ Add automated tests with pytest \n
 
-~ Add automated tests with pytest
-~ Save and load applications using JSON
+~ Add automated tests with pytest \n
+~ Save and load applications using JSON \n
 
-~ Built an interactive command-line menu
-~ Added application creation through user input
-~ Added interactive listing, searching, and status updates
-~ Connected the command-line interface to JSON persistence
+~ Built an interactive command-line menu \n
+~ Added application creation through user input \n
+~ Added interactive listing, searching, and status updates \n
+~ Connected the command-line interface to JSON persistence \n
