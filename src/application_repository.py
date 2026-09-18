@@ -116,9 +116,62 @@ def delete_application(application_id):
 
             return cursor.fetchone()
 
-if __name__ == "__main__":
-    applications = get_all_applications()
+def update_application_url(application_id, new_url):
+    with get_connection() as connection:
+        with connection.cursor(row_factory=dict_row) as cursor:
+            cursor.execute(
+                """
+                UPDATE applications
+                SET
+                    job_url = %s,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = %s
+                RETURNING
+                    id,
+                    company,
+                    job_url,
+                    updated_at;
+                """,
+                (
+                    new_url,
+                    application_id
+                )
+            )
 
-    for application in applications:
-        print(application)
+            return cursor.fetchone()
+
+def find_applications_by_company(company):
+    with get_connection() as connection:
+        with connection.cursor(row_factory=dict_row) as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    id,
+                    company,
+                    position,
+                    location,
+                    job_url,
+                    application_date,
+                    status,
+                    notes
+                FROM applications
+                WHERE company ILIKE %s
+                ORDER BY id;
+                """,
+                (f"%{company}%",)
+            )
+
+            return cursor.fetchall()
+
+if __name__ == "__main__":
+    updated_application = update_application_url(
+        3,
+        "https://google.com/jobs/intern"
+    )
+
+    if updated_application is None:
+        print("Application not found.")
+    else:
+        print("Job URL updated successfully:")
+        print(updated_application)
         
