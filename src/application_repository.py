@@ -1,6 +1,5 @@
 from psycopg.rows import dict_row
-
-from database import get_connection
+from src.database import get_connection
 
 
 def get_all_applications():
