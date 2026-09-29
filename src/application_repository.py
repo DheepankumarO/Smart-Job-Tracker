@@ -162,6 +162,18 @@ def find_applications_by_company(company):
 
             return cursor.fetchall()
 
+def get_application_by_id(application_id):
+    query = """
+        SELECT *
+        FROM applications
+        WHERE id = %s;
+    """
+
+    with get_connection() as connection:
+        with connection.cursor(row_factory=dict_row) as cursor:
+            cursor.execute(query, (application_id,))
+            return cursor.fetchone()
+
 if __name__ == "__main__":
     updated_application = update_application_url(
         3,
