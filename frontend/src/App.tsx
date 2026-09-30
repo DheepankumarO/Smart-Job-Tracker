@@ -8,6 +8,9 @@ function App() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [isFormOpen, setIsFormOpen] = useState(false)
+  const [deletingId, setDeletingId] = useState<number | null>(null)
+  const [actionError, setActionError] = useState('')
+  const [updatingId, setUpdatingId] = useState<number | null>(null)
 
   useEffect(() => {
     async function loadApplications() {
@@ -43,6 +46,93 @@ function App() {
   const offerCount = applications.filter(
     (application) => application.status === 'Offer'
   ).length
+
+  async function handleDelete(application: JobApplication) {
+    const confirmed = window.confirm(
+      `Delete the application for ${application.company}?`
+    )
+
+    if (!confirmed) {
+      return
+    }
+
+    setDeletingId(application.id)
+    setActionError('')
+
+    try {
+      const response = await fetch(
+        `http://localhost:8000/applications/${application.id}`,
+        {
+          method: 'DELETE',
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error('Could not delete the application')
+      }
+
+      setApplications((currentApplications) =>
+        currentApplications.filter(
+          (currentApplication) =>
+            currentApplication.id !== application.id
+        )
+      )
+    } catch (error) {
+      if (error instanceof Error) {
+        setActionError(error.message)
+      } else {
+        setActionError('An unexpected error occurred')
+      }
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
+  async function handleStatusChange(
+    applicationId: number,
+    newStatus: string
+  ) {
+    setUpdatingId(applicationId)
+    setActionError('')
+
+    try {
+      const response = await fetch(
+        `http://localhost:8000/applications/${applicationId}/status`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            status: newStatus,
+          }),
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error('Could not update the application status')
+      }
+
+      setApplications((currentApplications) =>
+        currentApplications.map((application) =>
+          application.id === applicationId
+            ? {
+                ...application,
+                status: newStatus,
+              }
+            : application
+        )
+      )
+    } catch (error) {
+      if (error instanceof Error) {
+        setActionError(error.message)
+      } else {
+        setActionError('An unexpected error occurred')
+      }
+    } finally {
+      setUpdatingId(null)
+    }
+  }
 
   return (
     <main className="app-shell">
@@ -107,6 +197,12 @@ function App() {
           </span>
         </div>
 
+        {actionError && (
+          <div className="action-error">
+            {actionError}
+          </div>
+        )}
+
         {isLoading && (
           <div className="message-state">
             <p>Loading applications...</p>
@@ -137,6 +233,7 @@ function App() {
                   <th>Status</th>
                   <th>Applied</th>
                   <th>Job link</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
 
@@ -147,9 +244,25 @@ function App() {
                     <td>{application.position}</td>
                     <td>{application.location}</td>
                     <td>
-                      <span className="status-badge">
-                        {application.status}
-                      </span>
+                      <select
+                        className="status-select"
+                        value={application.status}
+                        onChange={(event) =>
+                          handleStatusChange(
+                            application.id,
+                            event.target.value
+                          )
+                        }
+                        disabled={updatingId === application.id}
+                        aria-label={`Update status for ${application.company}`}
+                      >
+                        <option value="Saved">Saved</option>
+                        <option value="Applied">Applied</option>
+                        <option value="Interview">Interview</option>
+                        <option value="Offer">Offer</option>
+                        <option value="Rejected">Rejected</option>
+                        <option value="Withdrawn">Withdrawn</option>
+                      </select>
                     </td>
                     <td>{application.application_date}</td>
                     <td>
@@ -160,6 +273,18 @@ function App() {
                       >
                         View job
                       </a>
+                    </td>
+                    <td>
+                      <button
+                        className="delete-button"
+                        type="button"
+                        onClick={() => handleDelete(application)}
+                        disabled={deletingId === application.id}
+                      >
+                        {deletingId === application.id
+                          ? 'Deleting...'
+                          : 'Delete'}
+                      </button>
                     </td>
                   </tr>
                 ))}

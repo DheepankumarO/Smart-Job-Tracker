@@ -399,3 +399,46 @@ button:disabled {
   opacity: 0.6;
 }
 
+.action-error {
+  padding: 12px 24px;
+  color: #b91c1c;
+  background: #fef2f2;
+  border-bottom: 1px solid #fecaca;
+}
+
+.delete-button {
+  border: 1px solid #fecaca;
+  border-radius: 9px;
+  padding: 7px 11px;
+  color: #b91c1c;
+  background: #fff;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.delete-button:hover:not(:disabled) {
+  background: #fef2f2;
+}
+
+.status-select {
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  padding: 6px 10px;
+  color: #1d4ed8;
+  background: #dbeafe;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.status-select:focus {
+  border-color: #2563eb;
+  outline: 3px solid #dbeafe;
+}
+
+.status-select:disabled {
+  cursor: wait;
+}
