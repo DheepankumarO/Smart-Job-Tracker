@@ -442,3 +442,47 @@ button:disabled {
 .status-select:disabled {
   cursor: wait;
 }
+
+.filter-panel {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px;
+  background: white;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+}
+
+.filter-panel label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #334155;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.filter-panel input,
+.filter-panel select {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 11px 12px;
+  color: #0f172a;
+  background: white;
+  font: inherit;
+}
+
+.filter-panel input:focus,
+.filter-panel select:focus {
+  border-color: #2563eb;
+  outline: 3px solid #dbeafe;
+}
+
+@media (max-width: 700px) {
+  .filter-panel {
+    grid-template-columns: 1fr;
+  }
+}

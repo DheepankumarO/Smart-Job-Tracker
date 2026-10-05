@@ -11,6 +11,10 @@ function App() {
   const [deletingId, setDeletingId] = useState<number | null>(null)
   const [actionError, setActionError] = useState('')
   const [updatingId, setUpdatingId] = useState<number | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState('All')
+  const [sortOption, setSortOption] = useState('newest')
+
 
   useEffect(() => {
     async function loadApplications() {
@@ -47,6 +51,49 @@ function App() {
     (application) => application.status === 'Offer'
   ).length
 
+  const normalizedSearchTerm = searchTerm.trim().toLowerCase()
+
+  const filteredApplications = applications
+    .filter((application) => {
+      const matchesSearch =
+        application.company
+          .toLowerCase()
+          .includes(normalizedSearchTerm) ||
+        application.position
+          .toLowerCase()
+          .includes(normalizedSearchTerm) ||
+        application.location
+          .toLowerCase()
+          .includes(normalizedSearchTerm)
+
+      const matchesStatus =
+        statusFilter === 'All' ||
+        application.status === statusFilter
+
+      return matchesSearch && matchesStatus
+    })
+    .sort((firstApplication, secondApplication) => {
+      if (sortOption === 'company') {
+        return firstApplication.company.localeCompare(
+          secondApplication.company
+        )
+      }
+
+      const firstDate = new Date(
+        firstApplication.application_date
+      ).getTime()
+
+      const secondDate = new Date(
+        secondApplication.application_date
+      ).getTime()
+
+      if (sortOption === 'oldest') {
+        return firstDate - secondDate
+      }
+
+      return secondDate - firstDate
+    })
+  
   async function handleDelete(application: JobApplication) {
     const confirmed = window.confirm(
       `Delete the application for ${application.company}?`
@@ -185,6 +232,46 @@ function App() {
         </article>
       </section>
 
+      <section className="filter-panel" aria-label="Application filters">
+        <label>
+          Search
+          <input
+            type="search"
+            placeholder="Company, position, or location"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+          />
+        </label>
+
+        <label>
+          Status
+          <select
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value)}
+          >
+            <option value="All">All statuses</option>
+            <option value="Saved">Saved</option>
+            <option value="Applied">Applied</option>
+            <option value="Interview">Interview</option>
+            <option value="Offer">Offer</option>
+            <option value="Rejected">Rejected</option>
+            <option value="Withdrawn">Withdrawn</option>
+          </select>
+        </label>
+
+        <label>
+          Sort
+          <select
+            value={sortOption}
+            onChange={(event) => setSortOption(event.target.value)}
+          >
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="company">Company A–Z</option>
+          </select>
+        </label>
+      </section>
+
       <section className="applications-panel">
         <div className="panel-header">
           <div>
@@ -193,7 +280,7 @@ function App() {
           </div>
 
           <span className="record-count">
-            {applications.length} records
+            {filteredApplications.length} of {applications.length} records
           </span>
         </div>
 
@@ -221,8 +308,30 @@ function App() {
             <p>Add an application to begin tracking your opportunities.</p>
           </div>
         )}
+        
+        {/* Applications exist, but none match the filters */}
+        {!isLoading &&
+          !error &&
+          applications.length > 0 &&
+          filteredApplications.length === 0 && (
+            <div className="empty-state">
+              <h3>No matching applications</h3>
+              <p>Try changing your search or status filter.</p>
+            </div>
+          )}
 
-        {!isLoading && !error && applications.length > 0 && (
+        {/* Display applications that match the filters */}
+        {!isLoading &&
+          !error &&
+          filteredApplications.length > 0 && (
+            <div className="table-container">
+              <table className="applications-table">
+                {/* Your existing table content */}
+              </table>
+            </div>
+          )}
+
+        {!isLoading && !error && filteredApplications.length > 0 && (
           <div className="table-container">
             <table className="applications-table">
               <thead>
@@ -238,7 +347,7 @@ function App() {
               </thead>
 
               <tbody>
-                {applications.map((application) => (
+                {filteredApplications.map((application) => (
                   <tr key={application.id}>
                     <td>{application.company}</td>
                     <td>{application.position}</td>
