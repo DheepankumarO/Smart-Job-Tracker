@@ -14,7 +14,7 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
   const [sortOption, setSortOption] = useState('newest')
-
+  const [applicationToEdit, setApplicationToEdit] = useState<JobApplication | null>(null)
 
   useEffect(() => {
     async function loadApplications() {
@@ -195,7 +195,10 @@ function App() {
         <button
           className="primary-button"
           type="button"
-          onClick={() => setIsFormOpen(true)}
+          onClick={() => {
+            setApplicationToEdit(null)
+            setIsFormOpen(true)
+          }}
         >
           Add application
         </button>
@@ -203,14 +206,36 @@ function App() {
 
       {isFormOpen && (
         <ApplicationForm
-          onClose={() => setIsFormOpen(false)}
-          onApplicationCreated={(newApplication) => {
-            setApplications((currentApplications) => [
-              ...currentApplications,
-              newApplication,
-            ])
+          key={applicationToEdit?.id ?? 'new'}
+          applicationToEdit={applicationToEdit}
+          onClose={() => {
+            setIsFormOpen(false)
+            setApplicationToEdit(null)
+          }}
+          onApplicationSaved={(savedApplication) => {
+            setApplications((currentApplications) => {
+              const applicationAlreadyExists =
+                currentApplications.some(
+                  (application) =>
+                    application.id === savedApplication.id
+                )
+
+              if (applicationAlreadyExists) {
+                return currentApplications.map((application) =>
+                  application.id === savedApplication.id
+                    ? savedApplication
+                    : application
+                )
+              }
+
+              return [
+                ...currentApplications,
+                savedApplication,
+              ]
+            })
 
             setIsFormOpen(false)
+            setApplicationToEdit(null)
           }}
         />
       )}
@@ -320,17 +345,6 @@ function App() {
             </div>
           )}
 
-        {/* Display applications that match the filters */}
-        {!isLoading &&
-          !error &&
-          filteredApplications.length > 0 && (
-            <div className="table-container">
-              <table className="applications-table">
-                {/* Your existing table content */}
-              </table>
-            </div>
-          )}
-
         {!isLoading && !error && filteredApplications.length > 0 && (
           <div className="table-container">
             <table className="applications-table">
@@ -384,16 +398,34 @@ function App() {
                       </a>
                     </td>
                     <td>
-                      <button
-                        className="delete-button"
-                        type="button"
-                        onClick={() => handleDelete(application)}
-                        disabled={deletingId === application.id}
-                      >
-                        {deletingId === application.id
-                          ? 'Deleting...'
-                          : 'Delete'}
-                      </button>
+                      <div className="row-actions">
+                        <button
+                          className="edit-button"
+                          type="button"
+                          onClick={() => {
+                            setApplicationToEdit(application)
+                            setIsFormOpen(true)
+
+                            window.scrollTo({
+                              top: 0,
+                              behavior: 'smooth',
+                            })
+                          }}
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          className="delete-button"
+                          type="button"
+                          onClick={() => handleDelete(application)}
+                          disabled={deletingId === application.id}
+                        >
+                          {deletingId === application.id
+                            ? 'Deleting...'
+                            : 'Delete'}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

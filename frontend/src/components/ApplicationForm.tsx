@@ -1,13 +1,17 @@
 import { useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
-import type { JobApplication, NewJobApplication } from '../types'
+import type {
+  JobApplication,
+  NewJobApplication,
+} from '../types'
 
 interface ApplicationFormProps {
+  applicationToEdit: JobApplication | null
   onClose: () => void
-  onApplicationCreated: (application: JobApplication) => void
+  onApplicationSaved: (application: JobApplication) => void
 }
 
-const initialFormData: NewJobApplication = {
+const emptyFormData: NewJobApplication = {
   company: '',
   position: '',
   location: '',
@@ -18,9 +22,24 @@ const initialFormData: NewJobApplication = {
 }
 
 function ApplicationForm({
+  applicationToEdit,
   onClose,
-  onApplicationCreated,
+  onApplicationSaved,
 }: ApplicationFormProps) {
+  const isEditing = applicationToEdit !== null
+
+  const initialFormData: NewJobApplication = applicationToEdit
+    ? {
+        company: applicationToEdit.company,
+        position: applicationToEdit.position,
+        location: applicationToEdit.location,
+        job_url: applicationToEdit.job_url ?? '',
+        application_date: applicationToEdit.application_date,
+        status: applicationToEdit.status,
+        notes: applicationToEdit.notes ?? '',
+      }
+    : emptyFormData
+
   const [formData, setFormData] =
     useState<NewJobApplication>(initialFormData)
 
@@ -29,7 +48,9 @@ function ApplicationForm({
 
   function handleChange(
     event: ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+      HTMLInputElement |
+      HTMLSelectElement |
+      HTMLTextAreaElement
     >
   ) {
     const { name, value } = event.target
@@ -40,31 +61,40 @@ function ApplicationForm({
     }))
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>
+  ) {
     event.preventDefault()
     setIsSaving(true)
     setError('')
 
+    const url = isEditing
+      ? `http://localhost:8000/applications/${applicationToEdit.id}`
+      : 'http://localhost:8000/applications'
+
+    const method = isEditing ? 'PUT' : 'POST'
+
     try {
-      const response = await fetch(
-        'http://localhost:8000/applications',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData),
-        }
-      )
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
 
       if (!response.ok) {
-        throw new Error('Could not save the application')
+        throw new Error(
+          isEditing
+            ? 'Could not update the application'
+            : 'Could not create the application'
+        )
       }
 
-      const createdApplication: JobApplication =
+      const savedApplication: JobApplication =
         await response.json()
 
-      onApplicationCreated(createdApplication)
+      onApplicationSaved(savedApplication)
     } catch (error) {
       if (error instanceof Error) {
         setError(error.message)
@@ -80,8 +110,15 @@ function ApplicationForm({
     <section className="form-panel">
       <div className="form-header">
         <div>
-          <p className="eyebrow">NEW RECORD</p>
-          <h2>Add an application</h2>
+          <p className="eyebrow">
+            {isEditing ? 'EDIT RECORD' : 'NEW RECORD'}
+          </p>
+
+          <h2>
+            {isEditing
+              ? 'Edit application'
+              : 'Add an application'}
+          </h2>
         </div>
 
         <button
@@ -94,7 +131,10 @@ function ApplicationForm({
         </button>
       </div>
 
-      <form className="application-form" onSubmit={handleSubmit}>
+      <form
+        className="application-form"
+        onSubmit={handleSubmit}
+      >
         <label>
           Company
           <input
@@ -135,7 +175,6 @@ function ApplicationForm({
             type="url"
             value={formData.job_url}
             onChange={handleChange}
-            required
           />
         </label>
 
@@ -177,7 +216,9 @@ function ApplicationForm({
         </label>
 
         {error && (
-          <p className="form-error full-width">{error}</p>
+          <p className="form-error full-width">
+            {error}
+          </p>
         )}
 
         <div className="form-actions full-width">
@@ -195,7 +236,11 @@ function ApplicationForm({
             type="submit"
             disabled={isSaving}
           >
-            {isSaving ? 'Saving...' : 'Save application'}
+            {isSaving
+              ? 'Saving...'
+              : isEditing
+                ? 'Update application'
+                : 'Save application'}
           </button>
         </div>
       </form>
