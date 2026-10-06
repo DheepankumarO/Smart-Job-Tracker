@@ -59,6 +59,55 @@ def test_update_application_status(clean_test_database):
 
     assert invalid_response.status_code == 422
 
+def test_update_application(clean_test_database):
+    created_application = create_test_application()
+    application_id = created_application["id"]
+
+    updated_data = {
+        "company": "Updated Company",
+        "position": "Senior Python Developer",
+        "location": "New York",
+        "job_url": "https://example.com/jobs/senior-python",
+        "application_date": "2026-10-05",
+        "status": "Interview",
+        "notes": "Application details were updated",
+    }
+
+    response = client.put(
+        f"/applications/{application_id}",
+        json=updated_data,
+    )
+
+    assert response.status_code == 200
+
+    updated_application = response.json()
+
+    assert updated_application["id"] == application_id
+    assert updated_application["company"] == "Updated Company"
+    assert updated_application["position"] == "Senior Python Developer"
+    assert updated_application["location"] == "New York"
+    assert updated_application["status"] == "Interview"
+    assert updated_application["notes"] == (
+        "Application details were updated"
+    )
+
+    get_response = client.get(
+        f"/applications/{application_id}"
+    )
+
+    assert get_response.status_code == 200
+    assert get_response.json()["company"] == "Updated Company"
+    assert get_response.json()["status"] == "Interview"
+
+    missing_response = client.put(
+        "/applications/999999",
+        json=updated_data,
+    )
+
+    assert missing_response.status_code == 404
+    assert missing_response.json() == {
+        "detail": "Application not found"
+    }
 
 def test_delete_application(clean_test_database):
     created_application = create_test_application()

@@ -1,7 +1,6 @@
 from psycopg.rows import dict_row
 from src.database import get_connection
 
-
 def get_all_applications():
     with get_connection() as connection:
         with connection.cursor(row_factory=dict_row) as cursor:
@@ -69,6 +68,57 @@ def create_application(
                     status,
                     notes
                 )
+            )
+
+            return cursor.fetchone()
+
+def update_application(
+    application_id,
+    company,
+    position,
+    location,
+    job_url,
+    application_date,
+    status,
+    notes=None,
+):
+    with get_connection() as connection:
+        with connection.cursor(row_factory=dict_row) as cursor:
+            cursor.execute(
+                """
+                UPDATE applications
+                SET
+                    company = %s,
+                    position = %s,
+                    location = %s,
+                    job_url = %s,
+                    application_date = %s,
+                    status = %s,
+                    notes = %s,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = %s
+                RETURNING
+                    id,
+                    company,
+                    position,
+                    location,
+                    job_url,
+                    application_date,
+                    status,
+                    notes,
+                    created_at,
+                    updated_at;
+                """,
+                (
+                    company,
+                    position,
+                    location,
+                    job_url,
+                    application_date,
+                    status,
+                    notes,
+                    application_id,
+                ),
             )
 
             return cursor.fetchone()

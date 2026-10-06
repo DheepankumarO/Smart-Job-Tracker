@@ -5,13 +5,14 @@ from src.application_repository import (
     delete_application,
     get_all_applications,
     get_application_by_id,
+    update_application,
     update_application_status,
 )
 from src.schemas import (
     ApplicationCreate,
     ApplicationStatusUpdate,
+    ApplicationUpdate,
 )
-
 
 app = FastAPI(
     title="Smart Job Tracker API",
@@ -32,7 +33,6 @@ def health_check():
         "status": "ok",
         "message": "Smart Job Tracker API is running",
     }
-
 
 @app.get("/applications")
 def list_applications():
@@ -64,6 +64,30 @@ def add_application(application: ApplicationCreate):
     )
 
     return created_application
+
+@app.put("/applications/{application_id}")
+def edit_application(
+    application_id: int,
+    application: ApplicationUpdate,
+):
+    updated_application = update_application(
+        application_id,
+        application.company,
+        application.position,
+        application.location,
+        application.job_url,
+        application.application_date,
+        application.status,
+        application.notes,
+    )
+
+    if updated_application is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Application not found",
+        )
+
+    return updated_application
 
 @app.patch("/applications/{application_id}/status")
 def change_application_status(
